@@ -1,4 +1,4 @@
-RF001 - Cadastros de Produtos: O sistema deve permitir que o administrador cadastre novos produtos, com nome, preço, quantidade e tipo (comida ou bebida) no estoque gerando um código de identificação para cada produto;
+RF001 - Cadastros de Produtos:RF001 - Cadastros de Produtos: O sistema deve permitir que o administrador cadastre novos produtos, com nome, preço, tipo (comida ou bebida), quantidade no estoque e código de identificação para cada produto;
 Entrada: Nome da bebida ou comida, descrição, preço, avisos de ingredientes alergênicos.
 Saída: Confirmação do cadastro da bebida ou comida.
 
