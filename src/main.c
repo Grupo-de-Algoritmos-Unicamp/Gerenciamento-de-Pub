@@ -3,7 +3,9 @@ menuCadastro()
 
 int main()
 {
-    menuCadastro();
+    menuCadastroProduto();
+    menuListarProdutos();
 
     return 0;
+
 }
