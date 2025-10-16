@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "estoque.h"
 
+//CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
 void cadastrarProduto(){
     char nome[20];
     float preco;
@@ -31,7 +32,7 @@ void cadastrarProduto(){
     fclose(arquivo);
 }
 
-void menuCadastro(){
+void menuCadastroProduto(){
     int resposta = 1;
     
     // Repete a pergunta e cadastra produtos no estoque e 
@@ -51,5 +52,85 @@ void menuCadastro(){
         } else{
             printf("Resposta inválida, digite novamente.\n");
         }
+    }
+
+}
+
+//CONSULTA DE PRODUTOS (LISTA)---------------------------------------------------------------------------------------------------
+//listar todos os itens do estoque
+void listarTodos()
+{
+    FILE* arquivo;
+    int codigo, quantidade;
+    char tipo;
+    float preco;
+    char nome[31];
+    arquivo = fopen ("estoque.txt", "r");
+    if (arquivo == NULL)
+    {
+        perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
+    }else {
+        while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+            printf("%d %s\n", codigo, nome);
+        }
+    }
+}
+
+//listar apenas as bebidas do estoque
+void listarBebidas(){
+    FILE* arquivo;
+    int codigo, quantidade;
+    char tipo;
+    float preco;
+    char nome[31];
+    arquivo = fopen ("estoque.txt", "r");
+    if (arquivo == NULL) {
+        perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
+    } else {
+        while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+            if(tipo == 'B') {
+            printf("%d %s\n", codigo, nome);
+            }
+        }
+    }
+}
+
+//listar todas as comidas do estoque
+void listarComidas(){
+    FILE* arquivo;
+    int codigo, quantidade;
+    char tipo;
+    float preco;
+    char nome[31];
+    arquivo = fopen ("estoque.txt", "r");
+    if (arquivo == NULL) {
+        perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
+    } else {
+        while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+            if(tipo == 'C') {
+            printf("%d %s\n", codigo, nome);
+            }
+        }
+    }
+}
+
+//função para usuário escolher qual lista quer consultar
+void menuListarProdutos() {
+    int res;
+    printf("------------MENU DE CONSULTA------------\n");
+    printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n");
+    printf("Consultar: ");
+    scanf("%d",&res);
+    printf("\n----------------------------------------\n");
+    switch(res){
+        case 1:
+            listarTodos();
+            break;
+        case 2:
+            listarBebidas();
+            break;
+        case 3:
+            listarComidas();
+            break;
     }
 }
