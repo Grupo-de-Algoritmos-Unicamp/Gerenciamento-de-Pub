@@ -114,13 +114,36 @@ void listarComidas(){
     }
 }
 
+void consultarProdutoPorCodigo(){
+    FILE* arquivo;
+    int codigo, quantidade, procuraCodigo;
+    char tipo;
+    float preco;
+    char nome[31];
+    printf("\nDigite o código do produto: ");
+    scanf("%d",&procuraCodigo);
+    arquivo = fopen ("estoque.txt", "r");
+    if (arquivo == NULL) {
+        perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
+    } else {
+        while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+            if(procuraCodigo == codigo) {
+            printf("%d %c %s R$%.2f %d(unidades)\n", codigo, tipo, nome, preco, quantidade);
+            break;
+            }else{
+                perror("Código não encontrado!");
+            }
+        }
+    }
+}
+
 //função para usuário escolher qual lista quer consultar
-void menuListarProdutos() {
-    int res;
+void menuConsultarProdutos() {
+    int opcao;
     printf("------------MENU DE CONSULTA------------\n");
-    printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n");
+    printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n(4) Consultar por código\n(0) Voltar ao Menu Inicial");
     printf("Consultar: ");
-    scanf("%d",&res);
+    scanf("%d",&opcao);
     printf("\n----------------------------------------\n");
     switch(res){
         case 1:
@@ -132,5 +155,12 @@ void menuListarProdutos() {
         case 3:
             listarComidas();
             break;
+        case 4:
+            consultarProdutoPorCodigo();
+            break;
+        case 0:
+            menuInicial();
+            break;
     }
 }
+
