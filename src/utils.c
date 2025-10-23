@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "utils.h"
+#include "estoque.h"
+#include "pedido.h"
 
 void menuInicial(){
     int opcao;
