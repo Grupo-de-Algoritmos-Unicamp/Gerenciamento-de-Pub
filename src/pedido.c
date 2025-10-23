@@ -109,9 +109,3 @@ void registrarPedido(){
 
     printf("\n\nPedido registrado com sucesso!");
 }
-
-int main(){
-    registrarPedido();
-
-    return 0;
-}
