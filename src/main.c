@@ -1,9 +1,9 @@
-#include "estoque.h" 
+#include "utils.h" 
+#include <stdio.h>
 
 int main()
 {
-    menuCadastroProduto();
-    menuListarProdutos();
+    menuInicial();
 
     return 0;
 
