@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "utils.h"
 #include "estoque.h"
 
 //CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
@@ -235,7 +236,7 @@ void menuConsultarProdutos() {
     printf("Consultar: ");
     scanf("%d",&opcao);
     printf("\n----------------------------------------\n");
-    switch(res){
+    switch(opcao){
         case 1:
             listarTodos();
             break;
