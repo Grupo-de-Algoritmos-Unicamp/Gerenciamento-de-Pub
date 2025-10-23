@@ -3,6 +3,7 @@
 
 void menuCadastroProduto();
 void menuListarProdutos();
+void menuConsultarProdutos();
 
 
 #endif // ESTOQUE_H
