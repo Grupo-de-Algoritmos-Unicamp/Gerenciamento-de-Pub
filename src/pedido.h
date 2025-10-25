@@ -6,3 +6,4 @@ void gerarArquivoPedido(char cpf[], int numeroPedido, char nome[][31], float pre
 void registrarPedido();
 
 #endif
+
