@@ -230,29 +230,19 @@ void consultarProdutoPorCodigo(){
 
 //função para usuário escolher qual lista quer consultar
 void menuConsultarProdutos() {
-    int opcao;
+    int resposta;]
+    void (*gerenciar[])()={menuInicial, listarTodos, listarBebidas, listarComidas, consultarProdutoPorCodigo};
     printf("------------MENU DE CONSULTA------------\n");
     printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n(4) Consultar por código\n(0) Voltar ao Menu Inicial");
     printf("Consultar: ");
     scanf("%d",&opcao);
     printf("\n----------------------------------------\n");
-    switch(opcao){
-        case 1:
-            listarTodos();
-            break;
-        case 2:
-            listarBebidas();
-            break;
-        case 3:
-            listarComidas();
-            break;
-        case 4:
-            consultarProdutoPorCodigo();
-            break;
-        case 0:
-            menuInicial();
-            break;
+    if(resposta<=4 && resposta>=0){
+        gerenciar[resposta]();
+    } else{
+        printf("Resposta inválida\n")
     }
 }
+
 
 
