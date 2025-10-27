@@ -3,46 +3,15 @@
 #include "utils.h"
 #include "estoque.h"
 
-//CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
-void cadastrarProduto(){
-    char nome[20];
-    float preco;
-    int quantidade, codigo;
-    char tipo;
-    FILE *arquivo = fopen("estoque.txt", "a+");
-
-    if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo estoque.txt\n");
-        return;
-    }
-
-    printf("\n-------Cadastro de Produtos-------\n");
-    printf("Digite o código do produto, no máximo 6 números inteiros: ");
-    scanf("%d", &codigo);
-    getchar(); // Limpa o buffer do teclado (o "enter" anterior)
-    printf("Digite o tipo de produto, 'C' para comidas e 'B' para bebidas: ");
-    scanf("%c", &tipo);
-    getchar(); // Limpa o buffer do teclado
-    printf("Digite o nome do produto: ");
-    scanf("%[^\n]", nome);
-    printf("Digite o preço do produto: ");
-    scanf("%f", &preco);
-    printf("Digite a quantidade do produto no estoque: ");
-    scanf("%d", &quantidade);
-
-    fprintf(arquivo, "%d %c %s %.2f %d\n", codigo, tipo, nome, preco, quantidade);
-    fclose(arquivo);
-}
-
 void mostrarEstoque(){
     FILE *arquivo = fopen("estoque.txt", "r");
     if(arquivo == NULL){
-        printf("Arquivo de estoque não estoque não encontrado.\n");
+        printf("Arquivo de estoque não encontrado.\n");
         return;
     }
 
     int codigo, quantidade;
-    char tipo, nome[31]
+    char tipo, nome[31];
     float preco;
 
     printf("\n--------- ESTOQUE ATUAL ---------\n");
@@ -100,7 +69,7 @@ void atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     fclose(arquivo);
 
     if (!encontrado) {
-        printf("Produto '%s' não encontrado no estoque!\n", nomeProduto);
+        printf("Produto '%s' nao encontrado no estoque!\n", nomeProduto);
     }
 }
 
@@ -117,6 +86,56 @@ void menuEstoque() {
         if (opcao == 1) cadastrarProduto();
         else if (opcao == 2) mostrarEstoque();
     } while (opcao != 0);
+}
+
+//CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
+void cadastrarProduto(){
+    char nome[20];
+    float preco;
+    int quantidade, codigo;
+    char tipo;
+
+    printf("\n-------Cadastro de Produtos-------\n");
+    printf("Digite o código do produto (até 6 números): ");
+    scanf("%d", &codigo);
+    getchar();
+    printf("Digite o tipo de produto ('C' para comidas, 'B' para bebidas): ");
+    scanf("%c", &tipo);
+    getchar();
+    printf("Digite o nome do produto: ");
+    scanf(" %[^\n]", nome);
+    printf("Digite o preço do produto: ");
+    scanf("%f", &preco);
+    printf("Digite a quantidade do produto: ");
+    scanf("%d", &quantidade);
+
+    // Verifica se o produto já existe no arquivo
+    FILE *arquivo = fopen("estoque.txt", "r");
+    if (arquivo != NULL) {
+        int codigoLido, qtdLida;
+        char tipoLido, nomeLido[31];
+        float precoLido;
+        while (fscanf(arquivo, "%d %c %s %f %d", &codigoLido, &tipoLido, nomeLido, &precoLido, &qtdLida) != EOF) {
+            if (strcmp(nomeLido, nome) == 0) {
+                fclose(arquivo);
+                printf("\nProduto '%s' ja existe. Atualizando quantidade...\n", nome);
+                atualizarEstoque(nome, quantidade, 2); // modo 2 = reposição
+                return;
+            }
+        }
+        fclose(arquivo);
+    }
+
+    // Se não existe, adiciona novo produto
+    arquivo = fopen("estoque.txt", "a");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo estoque.txt\n");
+        return;
+    }
+
+    fprintf(arquivo, "%d %c %s %.2f %d\n", codigo, tipo, nome, preco, quantidade);
+    fclose(arquivo);
+    printf("Produto '%s' cadastrado com sucesso!\n", nome);
 }
 
 void menuAlterarProduto(char *nome, float *preco, char *tipo, int *quantidade) {
@@ -316,7 +335,7 @@ void consultarProdutoPorCodigo(){
 
 //função para usuário escolher qual lista quer consultar
 void menuConsultarProdutos() {
-    int resposta;]
+    int resposta;
     void (*gerenciar[])()={menuInicial, listarTodos, listarBebidas, listarComidas, consultarProdutoPorCodigo};
     printf("------------MENU DE CONSULTA------------\n");
     printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n(4) Consultar por código\n(0) Voltar ao Menu Inicial");
@@ -329,7 +348,3 @@ void menuConsultarProdutos() {
         printf("Resposta inválida\n")
     }
 }
-
-
-
-
