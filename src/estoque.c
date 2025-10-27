@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "utils.h"
 #include "estoque.h"
 
@@ -31,6 +32,91 @@ void cadastrarProduto(){
 
     fprintf(arquivo, "%d %c %s %.2f %d\n", codigo, tipo, nome, preco, quantidade);
     fclose(arquivo);
+}
+
+void mostrarEstoque(){
+    FILE *arquivo = fopen("estoque.txt", "r");
+    if(arquivo == NULL){
+        printf("Arquivo de estoque não estoque não encontrado.\n");
+        return;
+    }
+
+    int codigo, quantidade;
+    char tipo, nome[31]
+    float preco;
+
+    printf("\n--------- ESTOQUE ATUAL ---------\n");
+    while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+        printf("Código: %d \nTipo: %c \nNome: %s \nPreço: R$%.2f \nQuantidade: %d\n", codigo, tipo, nome, preco, quantidade);
+    }
+
+    fclose(arquivo);
+}
+
+void atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
+    // modo = 1 → venda 
+    // modo = 2 → reposição 
+
+    FILE *arquivo = fopen("estoque.txt", "r");
+    if (arquivo == NULL) {
+        printf("estoque.txt não encontrado.\n");
+        return;
+    }
+
+    int codigo[100];
+    char tipo[100];
+    char nome[100][31];
+    float preco[100];
+    int quantidade[100];
+    int total = 0;
+    int encontrado = 0;
+
+    // Lê todo o conteúdo do arquivo
+    while (fscanf(arquivo, "%d %c %s %f %d", &codigo[total], &tipo[total], nome[total], &preco[total], &quantidade[total]) != EOF) {
+        if (strcmp(nome[total], nomeProduto) == 0) {
+            encontrado = 1;
+            if (modo == 1) { // venda
+                if (quantidade[total] >= quantidadeAlterar) {
+                    quantidade[total] -= quantidadeAlterar;
+                    printf("Produto '%s' atualizado: nova quantidade %d\n", nomeProduto, quantidade[total]);
+                } else {
+                    printf("Estoque insuficiente de '%s'. Quantidade disponível: %d\n", nomeProduto, quantidade[total]);
+                }
+            } else if (modo == 2) { // reposição
+                quantidade[total] += quantidadeAlterar;
+                printf("Produto '%s' reabastecido: nova quantidade %d\n", nomeProduto, quantidade[total]);
+            }
+        }
+        total++;
+    }
+    fclose(arquivo);
+
+    // Regrava todo o arquivo atualizado
+    arquivo = fopen("estoque.txt", "w");
+    for (int i = 0; i < total; i++) {
+        fprintf(arquivo, "%d %c %s %.2f %d\n",
+                codigo[i], tipo[i], nome[i], preco[i], quantidade[i]);
+    }
+    fclose(arquivo);
+
+    if (!encontrado) {
+        printf("Produto '%s' não encontrado no estoque!\n", nomeProduto);
+    }
+}
+
+void menuEstoque() {
+    int opcao;
+    do {
+        printf("\n--- MENU ESTOQUE ---\n");
+        printf("1. Cadastrar produto\n");
+        printf("2. Mostrar estoque\n");
+        printf("0. Sair\n");
+        printf("Escolha: ");
+        scanf("%d", &opcao);
+        getchar();
+        if (opcao == 1) cadastrarProduto();
+        else if (opcao == 2) mostrarEstoque();
+    } while (opcao != 0);
 }
 
 void menuAlterarProduto(char *nome, float *preco, char *tipo, int *quantidade) {
@@ -243,6 +329,7 @@ void menuConsultarProdutos() {
         printf("Resposta inválida\n")
     }
 }
+
 
 
 
