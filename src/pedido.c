@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "estoque.h"
 #include "pedido.h"
 
 int processarPagamento(float valorTotal, float *pagoCliente, float *troco) {
@@ -91,6 +92,20 @@ void gerarArquivoPedido(char cpf[], int numeroPedido, char nome[][31], float pre
     printf("\nPedido registrado com sucesso! Arquivo: %s\n\n", nomeArquivo);
 }
 
+void gerarArquivoFidelidade(char cpf[], float valorTotal, int quantidadeTotal) {
+    FILE *arquivo = fopen("fidelidade.txt", "a"); 
+
+    if (arquivo == NULL) {
+        printf("Erro ao gerar arquivo fidelidade!\n");
+        return;
+    }
+
+    fprintf(arquivo, "%s %.2f %d\n", cpf, valorTotal, quantidadeTotal);
+
+    fclose(arquivo);
+    printf("Registro de fidelidade salvo para o cliente %s\n", cpf);
+}
+
 void registrarPedido() {
     char cpf[15], pedidoSN;
     int tipoPagamento, numeroPedido = 1, i;
@@ -108,7 +123,7 @@ void registrarPedido() {
         scanf("%d", &i);
 
         char nome[i][31];
-        int quantidade[i];
+        int quantidade[i], quantidadeTotal = 0;
         float preco[i];
 
         for (int j = 0; j < i; j++) {
@@ -121,8 +136,12 @@ void registrarPedido() {
             printf("Digite a quantidade do produto %d: ", j + 1);
             scanf("%d", &quantidade[j]);
 
+            quantidadeTotal += quantidade[j];
             preco[j] *= quantidade[j]; 
             valorTotal += preco[j];
+
+            atualizarEstoque(nome[j], quantidade[j], 1);
+
         }
 
         printf("\nTotal: R$ %.2f\n\n", valorTotal);
@@ -130,6 +149,8 @@ void registrarPedido() {
         tipoPagamento = processarPagamento(valorTotal, &pagoCliente, &troco);
 
         gerarArquivoPedido(cpf, numeroPedido, nome, preco, quantidade, i, valorTotal, tipoPagamento, pagoCliente, troco);
+
+        gerarArquivoFidelidade(cpf, valorTotal, quantidadeTotal);
 
         numeroPedido++;
 
@@ -141,4 +162,9 @@ void registrarPedido() {
     } while (pedidoSN == 's' || pedidoSN == 'S');
 
     printf("Saindo...\n");
+}
+
+int main() {
+    registrarPedido();
+    return 0;
 }
