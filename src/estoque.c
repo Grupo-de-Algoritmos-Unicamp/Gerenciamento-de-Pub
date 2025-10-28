@@ -270,6 +270,8 @@ void listarTodos()
             printf("%d %s\n", codigo, nome);
         }
     }
+
+    fclose(arquivo);
 }
 
 //listar apenas as bebidas do estoque
@@ -289,6 +291,8 @@ void listarBebidas(){
             }
         }
     }
+
+    fclose(arquivo);
 }
 
 //listar todas as comidas do estoque
@@ -308,11 +312,13 @@ void listarComidas(){
             }
         }
     }
+
+    fclose(arquivo);
 }
 
 void consultarProdutoPorCodigo(){
     FILE* arquivo;
-    int codigo, quantidade, procuraCodigo;
+    int codigo, quantidade, procuraCodigo, encontrado = 0;
     char tipo;
     float preco;
     char nome[31];
@@ -324,13 +330,18 @@ void consultarProdutoPorCodigo(){
     } else {
         while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
             if(procuraCodigo == codigo) {
-            printf("%d %c %s R$%.2f %d(unidades)\n", codigo, tipo, nome, preco, quantidade);
-            break;
-            }else{
-                perror("Código não encontrado!");
+                printf("%d %c %s R$%.2f %d(unidades)\n", codigo, tipo, nome, preco, quantidade);
+                encontrado = 1;
+                break;
+            }
+            if (!encontrado){
+                printf("Código não encontrado!\n");
             }
         }
     }
+
+    fclose(arquivo);
+
 }
 
 //função para usuário escolher qual lista quer consultar
@@ -340,11 +351,12 @@ void menuConsultarProdutos() {
     printf("------------MENU DE CONSULTA------------\n");
     printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n(4) Consultar por código\n(0) Voltar ao Menu Inicial");
     printf("Consultar: ");
-    scanf("%d",&opcao);
+    scanf("%d",&resposta);
     printf("\n----------------------------------------\n");
     if(resposta<=4 && resposta>=0){
         gerenciar[resposta]();
     } else{
-        printf("Resposta inválida\n")
+        printf("Resposta inválida\n");
     }
 }
+
