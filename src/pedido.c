@@ -164,7 +164,3 @@ void registrarPedido() {
     printf("Saindo...\n");
 }
 
-int main() {
-    registrarPedido();
-    return 0;
-}
