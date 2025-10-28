@@ -2,6 +2,6 @@
 #define UTILS_H
 
 void menuInicial();
-
+void sair();
 
 #endif
