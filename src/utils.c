@@ -5,7 +5,7 @@
 
 void menuInicial(){
     int resposta;
-    void (*gerenciar[])()={sair, menuCadastroProduto, menuConsultarProdutos, /*cadastro de clientes*/, registrarPedido(); /*gerar relatório*/); 
+    void (*gerenciar[])()={sair, menuCadastroProduto, menuConsultarProdutos, /*cadastro de clientes*/, registrarPedido /*gerar relatório*/); 
     while (resposta!=0){
     printf("--------------MENU INICIAL--------------");
     printf("\n O que deseja fazer?");
@@ -26,3 +26,4 @@ void menuInicial(){
 void sair(){
     printf("Saindo...");
 }
+
