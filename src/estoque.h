@@ -2,8 +2,12 @@
 #define ESTOQUE_H
 
 void menuCadastroProduto();
-void menuListarProdutos();
 void menuConsultarProdutos();
 
+void cadastrarProduto();
+void mostrarEstoque();
+void atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo);
+void alterarProduto();
+void excluirProduto();
 
-#endif // ESTOQUE_H
+#endif
