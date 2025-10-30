@@ -3,25 +3,6 @@
 #include "utils.h"
 #include "estoque.h"
 
-void mostrarEstoque(){
-    FILE *arquivo = fopen("estoque.txt", "r");
-    if(arquivo == NULL){
-        printf("Arquivo de estoque não encontrado.\n");
-        return;
-    }
-
-    int codigo, quantidade;
-    char tipo, nome[31];
-    float preco;
-
-    printf("\n--------- ESTOQUE ATUAL ---------\n");
-    while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
-        printf("Código: %d \nTipo: %c \nNome: %s \nPreço: R$%.2f \nQuantidade: %d\n", codigo, tipo, nome, preco, quantidade);
-    }
-
-    fclose(arquivo);
-}
-
 void atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     // modo = 1 → venda 
     // modo = 2 → reposição 
@@ -71,21 +52,6 @@ void atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     if (!encontrado) {
         printf("Produto '%s' nao encontrado no estoque!\n", nomeProduto);
     }
-}
-
-void menuEstoque() {
-    int opcao;
-    do {
-        printf("\n--- MENU ESTOQUE ---\n");
-        printf("1. Cadastrar produto\n");
-        printf("2. Mostrar estoque\n");
-        printf("0. Sair\n");
-        printf("Escolha: ");
-        scanf("%d", &opcao);
-        getchar();
-        if (opcao == 1) cadastrarProduto();
-        else if (opcao == 2) mostrarEstoque();
-    } while (opcao != 0);
 }
 
 //CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
@@ -228,26 +194,65 @@ void alterarProduto(){
 }
 
 void excluirProduto(){
+    int codigoExcluir;
+    int encontrado=0;
+    
+    int codigo;
+    char tipo;
+    char nome[50];
+    float preco;
+    int quantidade;
+    
+    FILE *arquivo=fopen("estoque.txt", "r");
+    FILE *temp=fopen("temp.txt", "w");
 
+    if ((arquivo==NULL)||(temp==NULL)) {
+        printf("Erro: nao foi possivel abrir os arquivos.\n");
+        return;
+    }
+    
+    printf("\n-----------------Excluir Produto-----------------\n");
+    printf("Digite o código do produto que deseja excluir: ");
+    scanf("%d", &codigoExcluir);
+    
+    while(fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+        if(codigo==codigoExcluir){
+            encontrado = 1;
+            printf("Produto '%s', código: %d, foi excluído.\n", nome, codigo);
+        } else{
+            fprintf(temp, "%d %c %s %.2f %d\n", codigo, tipo, nome, preco, quantidade);
+        }
+    }
+
+    fclose(arquivo);
+    fclose(temp);
+
+    if(encontrado){
+        remove("estoque.txt");
+        rename("temp.txt", "estoque.txt");
+    } else{
+        remove("temp.txt");
+        printf("\nProduto com código %d não encontrado.\n", codigoExcluir);
+    }
 }
 
 void menuCadastroProduto(){
-    int resposta=3;
+    int resposta=-1;
     void (*gerenciar[])()={menuInicial, cadastrarProduto, alterarProduto, excluirProduto};
     //Repete a pergunta e cadastra produtos no estoque e 
     //volta para o menu inicial quando o usuário digita 0
     while (resposta!=0) {
         printf("\n\n-------Menu de Cadastro-------\n");
         printf("Digite 1 para cadastrar um produto\n");
-        printf("Digite 2 para alterar o produto\n");//Alteração do código
-        printf("Digite 3 para excluir um peoduto no estoque\n");//Alteração do código
-        printf("Digite 0 para voltar ao menu inicial\n");//Ateração no código
+        printf("Digite 2 para alterar o produto\n");
+        printf("Digite 3 para excluir um produto no estoque\n");
+        printf("Digite 0 para voltar ao menu inicial\n");
         printf("Resposta: ");
         scanf("%d", &resposta);
-        if(resposta<=3){//Alteração do código
-            gerenciar[resposta]();//Alteração do código
-        } else{//Alteração do código
-            printf("Resposta inválida\n");//Alteração do código
+        if(resposta<4){
+            gerenciar[resposta]();
+        } else{
+            printf("Resposta inválida\n");
         }
     }
 }
@@ -359,4 +364,3 @@ void menuConsultarProdutos() {
         printf("Resposta inválida\n");
     }
 }
-
