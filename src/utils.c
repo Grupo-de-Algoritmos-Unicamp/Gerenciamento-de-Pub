@@ -14,7 +14,7 @@ void menuInicial(){
     while (resposta!=0){
         printf("--------------MENU INICIAL--------------");
         printf("\n O que deseja fazer?");
-        printf("\n(1) Cadastrar produto\n(2) Consultar produto\n(3) Cadastrar cliente\n(4) Registrar pedido\n(5) Gerar relatório\n(0) Sair");
+        printf("\n(1) Cadastrar produto\n(2) Consultar produto\n(3) Registrar pedidos\n(4) Cadastrar cliente\n(5) Gerar relatório\n(0) Sair");
         printf("\nSelecionar: ");
         scanf("%d",&resposta);
         printf("\n----------------------------------------");
@@ -26,5 +26,6 @@ void menuInicial(){
         }  
     }
 }
+
 
 
