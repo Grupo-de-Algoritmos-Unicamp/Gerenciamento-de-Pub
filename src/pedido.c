@@ -1,6 +1,60 @@
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
 #include "estoque.h"
 #include "pedido.h"
+
+//Garante que ao abrir o programa novamente o número do pedido não recomece em 1
+int gerarProximoIDPedido() {
+    FILE *f = fopen("pedidos.txt", "r");
+
+    if (f==NULL){
+        return 1; //Retorna 1 se o arquivo pedidos.txt estiver vazio
+    } 
+
+    int ultimoID = 0;
+    char linha[256];
+
+    while (fgets(linha, sizeof(linha), f)) {
+        int id;
+        if (sscanf(linha, "%d;", &id) == 1)
+            if (id > ultimoID) ultimoID = id;
+    }
+
+    fclose(f);
+    return ultimoID + 1;
+}
+
+void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total) {
+    FILE *arquivo = fopen("pedidos.txt", "a");
+
+    if (!arquivo) {
+        printf("Erro ao abrir pedidos.txt!\n");
+        return;
+    }
+
+    time_t agora = time(NULL);
+    struct tm *t = localtime(&agora);
+    char data[20];
+    sprintf(data, "%02d/%02d/%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
+
+    fprintf(arquivo, "%03d %s %s %d %.2f\n", id, cpf, data, qtdProdutos, total);
+    fclose(arquivo);
+}
+
+void gerarArquivoItensVendidos(int id, char nomes[][31], int quant[], float unit[], float total[], int n) {
+    FILE *arquivo = fopen("itens_vendidos.txt", "a");
+    if (!arquivo) {
+        printf("Erro ao abrir itens_vendidos.txt!\n");
+        return;
+    }
+
+    for (int i = 0; i < n; i++)
+        fprintf(arquivo, "%03d %s %d %.2f %.2f\n", id, nomes[i], quant[i], unit[i], total[i]);
+
+    fclose(arquivo);
+}
 
 int processarPagamento(float valorTotal, float *pagoCliente, float *troco) {
     int tipoPagamento;
@@ -50,60 +104,49 @@ int processarPagamento(float valorTotal, float *pagoCliente, float *troco) {
     return tipoPagamento;
 }
 
-void gerarArquivoPedido(char cpf[], int numeroPedido, char nome[][31], float preco[], int quantidade[], int i, float valorTotal, int tipoPagamento, float pagoCliente, float troco) {
-    char nomeArquivo[50];
-    sprintf(nomeArquivo, "pedido_%d.txt", numeroPedido);
+int verificarProdutosPedido(int qtdProdutos, char nomes[][31], int quantidades[], float precoUnit[], float precoTotal[], float *valorTotal) {
+    *valorTotal = 0;
 
-    FILE *pedido = fopen(nomeArquivo, "w");
-    if (pedido == NULL) {
-        printf("Erro ao criar o arquivo do pedido!\n");
-        return;
-    }
+    for (int i = 0; i < qtdProdutos; i++) {
+        printf("\nNome do produto %d: ", i + 1);
+        scanf(" %30[^\n]", nomes[i]);
 
-    fprintf(pedido, "----------PEDIDO----------\n\n");
-    fprintf(pedido, "CPF do Cliente: %s\n", cpf);
-    fprintf(pedido, "Numero do pedido: %d\n\n", numeroPedido);
-    fprintf(pedido, "Lista de Produtos:\n\n");
+        printf("Quantidade: ");
+        scanf("%d", &quantidades[i]);
 
-    for (int j = 0; j < i; j++) {
-        fprintf(pedido, "Produto %d\n", j + 1);
-        fprintf(pedido, "Nome: %s\n", nome[j]);
-        fprintf(pedido, "Quantidade: %d\n", quantidade[j]);
-        fprintf(pedido, "Preco total: R$ %.2f\n\n", preco[j]);
-    }
-
-    fprintf(pedido, "Total: R$ %.2f\n\n", valorTotal);
-
-    fprintf(pedido, "Forma de pagamento: ");
-
-    if (tipoPagamento == 1) {
-        fprintf(pedido, "PIX\n");
-    } else if (tipoPagamento == 2) {
-        fprintf(pedido, "Cartao\n");
-    } else {
-        fprintf(pedido, "Dinheiro\n");
-        if (troco > 0) {
-            fprintf(pedido, "Cliente forneceu R$ %.2f\n", pagoCliente);
-            fprintf(pedido, "Troco: R$ %.2f\n", troco);
+        if (quantidades[i] <= 0) {
+            printf("Quantidade invalida.\n");
+            return 0;
         }
-    }
 
-    fclose(pedido);
-    printf("\nPedido registrado com sucesso! Arquivo: %s\n\n", nomeArquivo);
+        float preco;
+        int disponivel;
+        if (!obterPrecoQuantidade(nomes[i], &preco, &disponivel)) {
+            printf("Produto '%s' não encontrado! Pedido cancelado.\n", nomes[i]);
+            return 0;
+        }
+
+        if (disponivel < quantidades[i]) {
+            printf("Estoque insuficiente de '%s'! Pedido cancelado.\n", nomes[i]);
+            return 0;
+        }
+
+        precoUnit[i] = preco;
+        precoTotal[i] = preco * quantidades[i];
+        *valorTotal += precoTotal[i];
+    }
+    return 1;
 }
 
-void gerarArquivoFidelidade(char cpf[], float valorTotal, int quantidadeTotal) {
-    FILE *arquivo = fopen("fidelidade.txt", "a"); 
-
-    if (arquivo == NULL) {
-        printf("Erro ao gerar arquivo fidelidade!\n");
-        return;
+int atualizarEstoquePedido(int qtdProdutos, char nomes[][31], int quantidades[]) {
+    for (int i = 0; i < qtdProdutos; i++) {
+        int r = atualizarEstoque(nomes[i], quantidades[i], 1);
+        if (r != 1) {
+            printf("Falha ao atualizar estoque de '%s'.\n", nomes[i]);
+            return 0;
+        }
     }
-
-    fprintf(arquivo, "%s %.2f %d\n", cpf, valorTotal, quantidadeTotal);
-
-    fclose(arquivo);
-    printf("Registro de fidelidade salvo para o cliente %s\n", cpf);
+    return 1;
 }
 
 void registrarPedido() {
@@ -163,4 +206,5 @@ void registrarPedido() {
 
     printf("Saindo...\n");
 }
+
 
