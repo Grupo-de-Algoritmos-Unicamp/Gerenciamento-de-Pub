@@ -9,5 +9,7 @@ void mostrarEstoque();
 void atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo);
 void alterarProduto();
 void excluirProduto();
+int obterPrecoQuantidade(const char nomeProduto[], float *precoUnitario, int *quantidadeDisponivel);
 
 #endif
+
