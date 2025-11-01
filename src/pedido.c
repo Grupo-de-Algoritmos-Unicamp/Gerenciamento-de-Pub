@@ -56,38 +56,35 @@ void gerarArquivoItensVendidos(int id, char nomes[][31], int quant[], float unit
     fclose(arquivo);
 }
 
-int processarPagamento(float valorTotal, float *pagoCliente, float *troco) {
+void processarPagamento(float valorTotal, float *pagoCliente, float *troco) {
     int tipoPagamento;
     char trocoSN;
 
     do {
-        printf("Qual sera a forma de pagamento: \n");
-        printf("(1) PIX \n");
-        printf("(2) Cartao de Credito/Debito \n");
-        printf("(3) Dinheiro \n");
-        printf("Opcao: ");
+        printf("Qual será a forma de pagamento:\n(1) PIX\n(2) Cartão de Crédito/Débito\n(3) Dinheiro \n");
+        printf("Opção: ");
         scanf("%d", &tipoPagamento);
 
         switch (tipoPagamento) {
             case 1:
-                printf("\nGere o codigo na maquininha\n");
+                printf("\nGere o código na maquininha\n");
                 break;
             case 2:
-                printf("\nSelecione credito ou debito na maquininha, e peca para o cliente inserir ou aproximar o cartao na maquininha\n");
+                printf("\nSelecione crédito ou débito na maquininha, e peça para o cliente inserir ou aproximar o cartão na maquininha\n");
                 break;
             case 3:
                 printf("\nAbra a caixa registradora e receba o dinheiro do cliente!\n");
-                printf("Eh preciso devolver troco ao cliente? <s/n> ");
+                printf("É preciso devolver troco ao cliente? <s/n> ");
                 scanf(" %c", &trocoSN);
 
                 if (trocoSN == 's' || trocoSN == 'S') {
-                    printf("\nDigite a quantia que o cliente forneceu em nota: ");
+                    printf("\nDigite a quantia que o cliente forneceu: ");
                     scanf("%f", pagoCliente);
 
                     *troco = *pagoCliente - valorTotal;
 
                     if (*troco < 0) {
-                        printf("\nO valor fornecido eh insuficiente! Falta R$%.2f\n", -*troco);
+                        printf("\nO valor fornecido é insuficiente! Falta R$%.2f\n", -*troco);
                         *troco = 0; 
                     } else {
                         printf("\nDevolva o troco de R$%.2f ao cliente\n", *troco);
@@ -95,13 +92,11 @@ int processarPagamento(float valorTotal, float *pagoCliente, float *troco) {
                 }
                 break;
             default:
-                printf("\nOpcao de pagamento invalida! TENTE NOVAMENTE!\n\n");
+                printf("\nOpcao de pagamento inválida! TENTE NOVAMENTE!\n\n");
                 continue;
         }
         break;
     } while (1);
-
-    return tipoPagamento;
 }
 
 int verificarProdutosPedido(int qtdProdutos, char nomes[][31], int quantidades[], float precoUnit[], float precoTotal[], float *valorTotal) {
@@ -150,61 +145,51 @@ int atualizarEstoquePedido(int qtdProdutos, char nomes[][31], int quantidades[])
 }
 
 void registrarPedido() {
-    char cpf[15], pedidoSN;
-    int tipoPagamento, numeroPedido = 1, i;
+    char cpf[32], continuar = 'n';
     float valorTotal, pagoCliente, troco;
 
     do {
-        valorTotal = 0; 
-        pagoCliente = 0;
-        troco = 0;
-
-        printf("Digite o CPF do cliente <utilizando pontos e hifen>: ");
+        printf("\nDigite o CPF do cliente: ");
         scanf("%s", cpf);
 
-        printf("Digite quantos produtos o cliente comprou: ");
-        scanf("%d", &i);
+        int qtdProdutos;
+        printf("Digite a quantidade de produtos distintos: ");
+        scanf("%d", &qtdProdutos);
 
-        char nome[i][31];
-        int quantidade[i], quantidadeTotal = 0;
-        float preco[i];
-
-        for (int j = 0; j < i; j++) {
-            printf("\nDigite o nome do produto %d: ", j + 1);
-            scanf(" %[^\n]", nome[j]);
-
-            printf("Digite o preco unitario do produto %d: ", j + 1);
-            scanf("%f", &preco[j]);
-
-            printf("Digite a quantidade do produto %d: ", j + 1);
-            scanf("%d", &quantidade[j]);
-
-            quantidadeTotal += quantidade[j];
-            preco[j] *= quantidade[j]; 
-            valorTotal += preco[j];
-
-            atualizarEstoque(nome[j], quantidade[j], 1);
-
+        if (qtdProdutos <= 0) {
+            printf("Quantidade invalida.\n");
+            return;
         }
 
-        printf("\nTotal: R$ %.2f\n\n", valorTotal);
+        char nomes[qtdProdutos][31];
+        int quantidades[qtdProdutos];
+        float precoUnit[qtdProdutos], precoTotal[qtdProdutos];
 
-        tipoPagamento = processarPagamento(valorTotal, &pagoCliente, &troco);
+        // Verificação antes de atualizar o estoque
+        if (!verificarProdutosPedido(qtdProdutos, nomes, quantidades, precoUnit, precoTotal, &valorTotal)){
+            return;
+        } 
+        
+        // Atualiza o estoque
+        if (!atualizarEstoquePedido(qtdProdutos, nomes, quantidades)){
+            return;
+        }
 
-        gerarArquivoPedido(cpf, numeroPedido, nome, preco, quantidade, i, valorTotal, tipoPagamento, pagoCliente, troco);
+        // Processamento e gravação
+        printf("\nTotal: R$ %.2f\n", valorTotal);
+        pagoCliente = 0;
+        troco = 0;
+        processarPagamento(valorTotal, &pagoCliente, &troco);
 
-        gerarArquivoFidelidade(cpf, valorTotal, quantidadeTotal);
+        int idPedido = gerarProximoIDPedido();
+        gerarArquivoPedidos(idPedido, cpf, qtdProdutos, valorTotal);
+        gerarArquivoItensVendidos(idPedido, nomes, quantidades, precoUnit, precoTotal, qtdProdutos);
 
-        numeroPedido++;
+        printf("\nPedido %03d registrado com sucesso!\n", idPedido);
 
-        printf("Deseja gerar um novo pedido <s/n>? ");
-        scanf(" %c", &pedidoSN);
+        printf("Deseja registrar outro pedido? (s/n): ");
+        scanf(" %c", &continuar);
+    } while (continuar == 's' || continuar == 'S');
 
-        printf("\n");
-
-    } while (pedidoSN == 's' || pedidoSN == 'S');
-
-    printf("Saindo...\n");
+    printf("\nSaindo...\n");
 }
-
-
