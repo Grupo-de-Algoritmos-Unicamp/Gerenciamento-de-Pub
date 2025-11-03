@@ -23,6 +23,7 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     int total = 0;
     int encontrado = 0;
     size_t capacity = 0;
+    int codigoEncontrado = -1;
 
     while (1) {
         int cod;
@@ -41,7 +42,7 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
             preco = realloc(preco, capacity * sizeof(float));
             quantidade = realloc(quantidade, capacity * sizeof(int));
             if (!codigo || !tipo || !nome || !preco || !quantidade) {
-                printf("Erro de memoria.\n");
+                printf("Erro de memória.\n");
                 fclose(arquivo);
                 return 0;
             }
@@ -53,33 +54,62 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
         preco[total] = p;
         quantidade[total] = q;
 
-        // comparar nomes
         if (strcmp(nome[total], nomeProduto) == 0) {
             encontrado = 1;
-            if (modo == 1) { // venda
-                if (quantidade[total] >= quantidadeAlterar) {
-                    quantidade[total] -= quantidadeAlterar;
-                    printf("Produto '%s' atualizado: nova quantidade %d\n", nomeProduto, quantidade[total]);
-                } else {
-                    printf("Estoque insuficiente de '%s'. Quantidade disponível: %d\n", nomeProduto, quantidade[total]);
-                    fclose(arquivo);
-                    free(codigo); free(tipo); free(nome); free(preco); free(quantidade);
-                    return -1; // quantidade insuficiente
-                }
-            } else if (modo == 2) { // reposição
-                quantidade[total] += quantidadeAlterar;
-                printf("Produto '%s' reabastecido: nova quantidade %d\n", nomeProduto, quantidade[total]);
-            }
+            codigoEncontrado = codigo[total];
         }
 
         total++;
     }
     fclose(arquivo);
 
+    // Se não encontrado, permitir procurar pelo código
     if (!encontrado) {
-        printf("Produto '%s' nao encontrado no estoque!\n", nomeProduto);
+        char opcao;
+        printf("Produto '%s' não encontrado no estoque.\n", nomeProduto);
+        printf("Deseja procurar pelo código? (s/n): ");
+        scanf(" %c", &opcao);
+
+        if (opcao == 's' || opcao == 'S') {
+            int codigoBusca;
+            printf("Digite o código do produto: ");
+            scanf("%d", &codigoBusca);
+
+            for (int i = 0; i < total; i++) {
+                if (codigo[i] == codigoBusca) {
+                    encontrado = 1;
+                    codigoEncontrado = codigo[i];
+                    strcpy(nomeProduto, nome[i]);
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!encontrado) {
+        printf("Produto não encontrado, operação cancelada.\n");
         free(codigo); free(tipo); free(nome); free(preco); free(quantidade);
-        return 0; 
+        return 0;
+    }
+
+    // Atualiza o item encontrado
+    for (int i = 0; i < total; i++) {
+        if (codigo[i] == codigoEncontrado) {
+            if (modo == 1) { // venda
+                if (quantidade[i] >= quantidadeAlterar) {
+                    quantidade[i] -= quantidadeAlterar;
+                    printf("Produto '%s' atualizado: nova quantidade %d\n", nomeProduto, quantidade[i]);
+                } else {
+                    printf("Estoque insuficiente de '%s'. Quantidade disponível: %d\n", nomeProduto, quantidade[i]);
+                    free(codigo); free(tipo); free(nome); free(preco); free(quantidade);
+                    return -1;
+                }
+            } else if (modo == 2) { // reposição
+                quantidade[i] += quantidadeAlterar;
+                printf("Produto '%s' reabastecido: nova quantidade %d\n", nomeProduto, quantidade[i]);
+            }
+            break;
+        }
     }
 
     // Regrava todo o arquivo atualizado
@@ -97,7 +127,6 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     fclose(arquivo);
 
     free(codigo); free(tipo); free(nome); free(preco); free(quantidade);
-
     return 1;
 }
 
@@ -319,7 +348,7 @@ void listarTodos()
         perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
     }else {
         while (fscanf(arquivo, "%d %c %s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
-            printf("%d %s\n", codigo, nome);
+            printf("%d %c %s %.2f %d\n", codigo, tipo, nome, preco, quantidade);
         }
     }
 
@@ -338,8 +367,8 @@ void listarBebidas(){
         perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
     } else {
         while (fscanf(arquivo, "%d %c %30s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
-            if(tipo == 'B') {
-                printf("%d %s\n", codigo, nome);
+            if(tipo == 'B' || tipo == 'b') {
+                printf("%d %s %.2f %d\n", codigo, nome, preco, quantidade);
             }
         }
     }
@@ -359,8 +388,8 @@ void listarComidas(){
         perror("Erro ao abrir o arquivo!"); //mensagem de erro caso o arquivo não exista
     } else {
         while (fscanf(arquivo, "%d %c %30s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
-            if(tipo == 'C') {
-            printf("%d %s\n", codigo, nome);
+            if(tipo == 'C' || tipo == 'c') {
+                printf("%d %s %.2f %d\n", codigo, nome, preco, quantidade);
             }
         }
     }
@@ -401,7 +430,7 @@ void menuConsultarProdutos() {
     int resposta;
     void (*gerenciar[])()={menuInicial, listarTodos, listarBebidas, listarComidas, consultarProdutoPorCodigo};
     printf("------------MENU DE CONSULTA------------\n");
-    printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n(4) Consultar por código\n(0) Voltar ao Menu Inicial");
+    printf("Qual lista você deseja consultar?\n(1) Lista de todos os produtos\n(2) Lista de bebidas\n(3) Lista de comidas\n(4) Consultar por código\n(0) Voltar ao Menu Inicial\n");
     printf("Consultar: ");
     scanf("%d",&resposta);
     printf("\n----------------------------------------\n");
@@ -428,6 +457,30 @@ int obterPrecoQuantidade(const char nomeProduto[], float *precoUnitario, int *qu
             return 1;
         }
     }
+    fclose(arquivo);
+    return 0;
+}
+
+int obterPrecoQuantidadePorCodigo(int codigoBusca, float *precoUnitario, int *quantidadeDisponivel, char *nomeProduto) {
+    FILE *arquivo = fopen("estoque.txt", "r");
+    if (!arquivo) return 0;
+
+    int codigo;
+    char tipo;
+    char nome[31];
+    float preco;
+    int quantidade;
+
+    while (fscanf(arquivo, "%d %c %30s %f %d", &codigo, &tipo, nome, &preco, &quantidade) != EOF) {
+        if (codigo == codigoBusca) {
+            *precoUnitario = preco;
+            *quantidadeDisponivel = quantidade;
+            strcpy(nomeProduto, nome);
+            fclose(arquivo);
+            return 1;
+        }
+    }
+
     fclose(arquivo);
     return 0;
 }
