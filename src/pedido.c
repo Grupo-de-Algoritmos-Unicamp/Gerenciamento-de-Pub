@@ -116,11 +116,28 @@ int verificarProdutosPedido(int qtdProdutos, char nomes[][31], int quantidades[]
 
         float preco;
         int disponivel;
-        if (!obterPrecoQuantidade(nomes[i], &preco, &disponivel)) {
-            printf("Produto '%s' não encontrado! Pedido cancelado.\n", nomes[i]);
-            return 0;
-        }
 
+        if (!obterPrecoQuantidade(nomes[i], &preco, &disponivel)) {
+            char opcao;
+            printf("Produto '%s' não encontrado no estoque.\n", nomes[i]);
+            printf("Deseja procurar pelo código? (s/n): ");
+            scanf(" %c", &opcao);
+
+            if (opcao == 's' || opcao == 'S') {
+                int codigoBusca;
+                printf("Digite o código do produto: ");
+                scanf("%d", &codigoBusca);
+
+                if (!obterPrecoQuantidadePorCodigo(codigoBusca, &preco, &disponivel, nomes[i])) {
+                    printf("Código %d também não encontrado. Pedido cancelado.\n", codigoBusca);
+                    return 0;
+                }
+            } else {
+                printf("Produto ignorado. Pedido cancelado.\n");
+                return 0;
+            }
+        }
+        
         if (disponivel < quantidades[i]) {
             printf("Estoque insuficiente de '%s'! Pedido cancelado.\n", nomes[i]);
             return 0;
@@ -193,3 +210,4 @@ void registrarPedido() {
 
     printf("\nSaindo...\n");
 }
+
