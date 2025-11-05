@@ -1,0 +1,6 @@
+# Ignorar arquivos objeto
+*.o
+
+# Ignorar o executável final
+gerenciaPub
+*.exe
