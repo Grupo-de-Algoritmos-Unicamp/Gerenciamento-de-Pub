@@ -4,3 +4,7 @@
 # Ignorar o executável final
 gerenciaPub
 *.exe
+
+# Ignorar arquivos temporários de editor de texto
+*.swp
+*~
