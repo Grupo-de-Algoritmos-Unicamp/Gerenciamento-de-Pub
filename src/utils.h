@@ -3,5 +3,9 @@
 
 void menuInicial();
 void sair();
+void cadastrarCliente();
+float calcularValorGasto(char* buscaCpf);
+void consultarCliente();
 
 #endif
+
