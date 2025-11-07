@@ -37,7 +37,7 @@ void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total) 
     time_t agora = time(NULL);
     struct tm *t = localtime(&agora);
     char data[20];
-    sprintf(data, "%02d/%02d/%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
+    strftime(data, 20, "%d/%m/%Y", t);
 
     fprintf(arquivo, "%03d %s %s %d %.2f\n", id, cpf, data, qtdProdutos, total);
     fclose(arquivo);
