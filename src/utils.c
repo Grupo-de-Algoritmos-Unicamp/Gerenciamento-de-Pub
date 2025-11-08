@@ -50,7 +50,7 @@ void cadastrarCliente() {
     
     FILE *arqCliente = abrirArquivoClientes(2);
     if (arqCliente == NULL){
-        printf("Erro ao abrir o arquivo!");
+        printf("Erro ao abrir o arquivo de clientes!");
         return;
     }
     
@@ -108,7 +108,7 @@ void consultarCliente() {
 
     FILE *arqCliente = fopen("clientes.txt", "r");
     if (arqCliente == NULL){
-        printf("Erro ao abrir o arquivo!\n");
+        printf("Erro ao abrir o arquivo de clientes!\n");
         return;
     }
     
