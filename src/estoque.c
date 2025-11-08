@@ -4,14 +4,6 @@
 #include "utils.h"
 #include "estoque.h"
 
-typedef struct {
-    int codigo;
-    char tipo;
-    char nome[100];
-    float preco;
-    int quantidade;
-} Produtos;
-
 FILE* abrirArquivoEstoque(int modo) {
     // 1:estoque-a  2:estoque-r 3:tempAlterar-w  4:tempExcluir-w
     FILE* arquivo = NULL;

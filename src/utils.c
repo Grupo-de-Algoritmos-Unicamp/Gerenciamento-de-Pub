@@ -133,12 +133,6 @@ void consultarCliente() {
     }
 }
 
-typedef struct {
-    char nome[50];
-    int quantidadeTotal;
-    float valorTotal;
-} ResumoProduto;
-
 //lê os arquivos e retorna dados
 void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, Produto **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro) {
     FILE *fpPedidos = abrirArquivosPedidos(1);   

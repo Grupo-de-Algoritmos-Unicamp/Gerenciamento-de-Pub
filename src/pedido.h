@@ -1,16 +1,6 @@
 #ifndef PEDIDO_H
 #define PEDIDO_H
-
-FILE* abrirArquivosPedidos(int modo);
-
-void registrarPedido();
-void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total);
-void gerarArquivoItensVendidos(Pedido *pedido);
-void processarPagamento(float valorTotal, float *pagoCliente, float *troco);
-
-int gerarProximoIDPedido();
-int verificarProdutosPedido(Pedido *pedido);
-int atualizarEstoquePedido(Pedido *pedido);
+#include "estoque.h"
 
 typedef struct{
     char nome[31];
@@ -27,6 +17,17 @@ typedef struct{
     float valorTotal;
     Produto *produto;
 } Pedido;
+
+FILE* abrirArquivosPedidos(int modo);
+
+void registrarPedido();
+void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total);
+void gerarArquivoItensVendidos(Pedido *pedido);
+void processarPagamento(float valorTotal, float *pagoCliente, float *troco);
+
+int gerarProximoIDPedido();
+int verificarProdutosPedido(Pedido *pedido);
+int atualizarEstoquePedido(Pedido *pedido);
 
 #endif
 
