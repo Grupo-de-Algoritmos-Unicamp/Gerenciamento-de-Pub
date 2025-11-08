@@ -1,11 +1,17 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+FILE* abrirArquivoClientes(int modo);
+
 void menuInicial();
 void sair();
 void cadastrarCliente();
-float calcularValorGasto(char* buscaCpf);
 void consultarCliente();
+void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, Produto **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro);
+void gerarArquivoRelatorio(const char *dataFiltro, int filtrar, ResumoProduto *resumo, size_t numResumo, float totalVendas, size_t numPedidos);
+void gerarRelatorio();
+
+float calcularValorGasto(const char* buscaCpf);
 
 #endif
 
