@@ -1,5 +1,13 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include "pedido.h"
+#include "estoque.h"
+
+typedef struct {
+    char nome[50];
+    int quantidadeTotal;
+    float valorTotal;
+} ResumoProduto;
 
 FILE* abrirArquivoClientes(int modo);
 
