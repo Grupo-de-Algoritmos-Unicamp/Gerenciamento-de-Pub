@@ -5,22 +5,6 @@
 #include "estoque.h"
 #include "pedido.h"
 
-typedef struct{
-    char nome[31];
-    int quantidade;
-    float precoUnitario;
-    float precoTotal;
-} Produto;
-
-typedef struct{
-    int id;
-    char cpf[32];
-    char data[20];
-    int quantidadeProdutos;
-    float valorTotal;
-    Produto *produto;
-} Pedido;
-
 FILE* abrirArquivosPedidos(int modo){
     FILE* arquivo = NULL;
 

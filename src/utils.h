@@ -3,6 +3,10 @@
 
 FILE* abrirArquivoClientes(int modo);
 
+typedef struct Pedido Pedido;
+typedef struct Produto Produto;
+typedef struct ResumoProduto ResumoProduto;
+
 void menuInicial();
 void sair();
 void cadastrarCliente();
