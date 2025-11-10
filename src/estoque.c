@@ -291,8 +291,7 @@ void ativarProduto(){
 }
 
 //LISTA DE PRODUTOS---------------------------------------------------------------------------------------------------
-void listarTodos()
-{
+void listarTodos(){
     FILE* arquivo = abrirArquivoEstoque(2);
     if(arquivo == NULL){
         return;
@@ -301,9 +300,14 @@ void listarTodos()
     Produtos produto;
     
     printf("\n------ Lista de Produtos ------\n");
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) == 5) {
-        printf("Código:%d | Tipo:%c | Nome:%s | R$%.2f | Qtd:%d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade);
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade,  &produto.status) == 6) {
+        if(produto.status==1){
+        produto.nome[20]='\0';
+        removerEspacoFinal(produto.nome);
+        printf("Código:%d | Tipo:%c | Nome:%s | R$%.2f | Qtd:%d | Status: %d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
+        }
     }
+    
     fclose(arquivo);
 }
 
@@ -317,9 +321,12 @@ void listarBebidas(){
     Produtos produto;
 
     printf("\n------ Lista de Bebidas ------\n");
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) == 5) {
-        if (produto.tipo == 'B' || produto.tipo == 'b')
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade,  &produto.status) == 6) {
+        if ((produto.tipo == 'B' || produto.tipo == 'b')&&(produto.status==1)){
+            produto.nome[20] = '\0'; 
+            removerEspacoFinal(produto.nome);
             printf("%d | %s | R$%.2f | %d un\n", produto.codigo, produto.nome, produto.preco, produto.quantidade);
+        }   
     }
 
     fclose(arquivo);
@@ -334,9 +341,13 @@ void listarComidas(){
 
     Produtos produto;
     printf("\n------ Lista de Comidas ------\n");
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) == 5) {
-        if (produto.tipo == 'C' || produto.tipo == 'c')
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status) == 6) {
+        if ((produto.tipo == 'C' || produto.tipo == 'c')&&(produto.status == 1)){
+            produto.nome[20] = '\0';
+            removerEspacoFinal(produto.nome);
             printf("%d | %s | R$%.2f | %d un\n", produto.codigo, produto.nome, produto.preco, produto.quantidade);
+        }
+        
     }
     fclose(arquivo);
 }
@@ -352,8 +363,11 @@ void consultarProdutoPorCodigo(){
     printf("\nDigite o código do produto: ");
     scanf("%d", &codigoProcurado);
 
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) == 5) {
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status) == 6) {
         if (produto.codigo == codigoProcurado) {
+            produto.nome[20] = '\0';
+            removerEspacoFinal(produto.nome);
+            printf("\n--- Produto Encontrado ---\n");
             printf("Código:%d | Tipo:%c | Nome:%s | R$%.2f | Qtd:%d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade);
             encontrado = 1;
             break;
@@ -373,8 +387,10 @@ int obterPrecoQuantidadePorNome(const char nomeProduto[], float *precoUnitario, 
 
     Produtos produto;
 
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) != EOF) {
-        if (strcmp(produto.nome, nomeProduto) == 0) {
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status) == 6) {
+        produto.nome[20]='\0';
+        removerEspacoFinal(produto.nome);
+        if ((strcmp(produto.nome, nomeProduto) == 0) && (produto.status==1)) {
             *precoUnitario = produto.preco;
             *quantidadeDisponivel = produto.quantidade;
             fclose(arquivo);
@@ -391,10 +407,12 @@ int obterPrecoQuantidadePorCodigo(int codigoBusca, float *precoUnitario, int *qu
 
     Produtos produto;
 
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) != EOF) {
-        if (produto.codigo == codigoBusca) {
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status) == 6) {
+        if ((produto.codigo == codigoBusca) &&(produto.status==1)) {
             *precoUnitario = produto.preco;
             *quantidadeDisponivel = produto.quantidade;
+            produto.nome[20]='\0';
+            removerEspacoFinal(produto.nome);
             strcpy(nomeProduto, produto.nome);
             fclose(arquivo);
             return 1;
@@ -423,8 +441,8 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
 
     // Lê todos os produtos do arquivo e armazena em memória
     Produtos produto;
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) == 5) {
-        
+    while (fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status) == 6) {
+        produto.nome[20]='\0';
         if (total == capacidade) {
             capacidade = (capacidade == 0) ? 10 : capacidade * 2;
             lista = realloc(lista, capacidade * sizeof(Produtos));
@@ -436,8 +454,8 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
         }
 
         lista[total] = produto;
-
         // verifica se é o produto que deve ser atualizado
+        removerEspacoFinal(produto.nome);
         if (strcmp(produto.nome, nomeProduto) == 0) {
             encontrado = 1;
             indiceEncontrado = (int)total;
@@ -487,12 +505,7 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     }
 
     for (size_t i = 0; i < total; i++) {
-        fprintf(arquivo, "%d;%c;%s;%.2f;%d\n",
-                lista[i].codigo,
-                lista[i].tipo,
-                lista[i].nome,
-                lista[i].preco,
-                lista[i].quantidade);
+        fprintf(arquivo, FORMATO_ESCRITA, lista[i].codigo, lista[i].tipo, lista[i].nome, lista[i].preco, lista[i].quantidade, lista[i].status);
     }
 
     fclose(arquivo);
@@ -537,4 +550,5 @@ void menuCadastroProduto() {
         }
     }while (opcao != 0);
 }
+
 
