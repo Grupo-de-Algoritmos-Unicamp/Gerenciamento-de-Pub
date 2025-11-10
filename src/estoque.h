@@ -19,15 +19,17 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo);
 int obterPrecoQuantidadePorNome(const char nomeProduto[], float *precoUnitario, int *quantidadeDisponivel);
 int obterPrecoQuantidadePorCodigo(int codigoBusca, float *precoUnitario, int *quantidadeDisponivel, char *nomeProduto);
 
-typedef struct {
+typedef struct{
     int codigo;
     char tipo;
-    char nome[100];
+    char nome[21];
     float preco;
     int quantidade;
-} Produtos;
+    int status;//1-Ativo e 0- inativo
+}Produtos;
 
 #endif
+
 
 
 
