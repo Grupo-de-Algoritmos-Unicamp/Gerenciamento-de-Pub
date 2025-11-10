@@ -9,14 +9,12 @@
 #define FORMATO_LEITURA "%6d %c %20c %10f %6d %1d\n"
 
 FILE* abrirArquivoEstoque(int modo) {
-    // 1:estoque-a  2:estoque-r 3:tempAlterar-w  4:tempExcluir-w
+    // 1:estoque-a  2:estoque-r 3:estoque-r+
     FILE* arquivo = NULL;
     switch (modo) {
         case 1: arquivo = fopen("estoque.txt", "a"); break;
         case 2: arquivo = fopen("estoque.txt", "r"); break;
-        case 3: arquivo = fopen("estoque.txt", "w"); break;
-        case 4: arquivo = fopen("tempAlterar.txt", "w"); break;
-        case 5: arquivo = fopen("tempExcluir.txt", "w"); break;
+        case 3: arquivo = fopen("estoque.txt", "r+"); break;
         default: printf("Modo inválido.\n");
     }
 
@@ -539,3 +537,4 @@ void menuCadastroProduto() {
         }
     }while (opcao != 0);
 }
+
