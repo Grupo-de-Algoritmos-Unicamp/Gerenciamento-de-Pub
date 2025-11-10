@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "utils.h"
 #include "estoque.h"
+
+#define FORMATO_ESCRITA "%06d %c %-20.20s %010.2f %06d %1d\n"
+#define FORMATO_LEITURA "%6d %c %20c %10f %6d %1d\n"
 
 FILE* abrirArquivoEstoque(int modo) {
     // 1:estoque-a  2:estoque-r 3:tempAlterar-w  4:tempExcluir-w
@@ -31,15 +35,32 @@ int verificarProduto(int codigo) {
         return 0;
     }
 
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produtoLido.codigo, &produtoLido.tipo, produtoLido.nome, &produtoLido.preco, &produtoLido.quantidade) == 5) {
-        if (produtoLido.codigo == codigo) {
-            encontrado = 1;
-            return 1;
+    while(fscanf(arquivo, FORMATO_LEITURA, &produtoLido.codigo, &produtoLido.tipo, produtoLido.nome, &produtoLido.preco, &produtoLido.quantidade, &produtoLido.status)==6){
+        produtoLido.nome[20] = '\0';
+        if (produtoLido.codigo==codigo) {
+            encontrado=1;
+            break;  
         }
     }
 
-    fclose(arquivo);
+    fclose (arquivo);
     return encontrado;
+}
+
+void removerEspacoFinal(char *nome) {//Remove espaços em branco do final da string
+    if (nome==NULL){ //Verifica se o ponteiro está vazio
+        return;
+    }
+    
+    char *ponteiroScanner=nome+19; //Aponta para o último caractere da string
+    
+    //Encontra o último caractere útil
+    while ((ponteiroScanner>=nome)&&(isspace((unsigned char)*ponteiroScanner))) {
+        ponteiroScanner--;
+    }
+    
+    //Coloca o '\0' logo após o último caractere não vazio da string
+    *(ponteiroScanner+1) = '\0';
 }
 
 //CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
@@ -60,21 +81,22 @@ void cadastrarProduto(){
     //Se não existe, continua normalmente
     printf("Digite o tipo de produto ('C' para comidas, 'B' para bebidas): ");
     scanf(" %c", &produto.tipo);
-    printf("Digite o nome do produto: ");
-    scanf(" %[^\n]", produto.nome);
+    printf("Digite o nome do produto (máx 20 caracteres): ");
+    scanf(" %20[^\n]", produto.nome);
     printf("Digite o preço do produto: ");
-    scanf("%f", &produto.preco);
+    scanf(" %f", &produto.preco);
     printf("Digite a quantidade do produto: ");
-    scanf("%d", &produto.quantidade);
+    scanf(" %d", &produto.quantidade);
+    produto.status=1; // Novo produto é sempre ATIVO
 
     FILE *arquivo = abrirArquivoEstoque(1); //("estoque.txt", "a")
     if(arquivo==NULL){
         return;
     }
-    fprintf(arquivo, "%06d;%c;%s;%.2f;%d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade);
+    fprintf(arquivo, FORMATO_ESCRITA, produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
     fclose(arquivo);
 
-    printf("Produto cadastrado com sucesso!\n");
+    printf("Produto cadastrado com sucesso.\n");
 
 }
 
@@ -86,14 +108,14 @@ void menuAlterarProduto(Produtos *produto) {
         printf("Tipo: %c\nNome: %s\nPreço: R$%.2f\nQuantidade: %d\n", produto->tipo, produto->nome, produto->preco, produto->quantidade);
         printf("--------------------------\n");
         printf("O que deseja alterar?\n");
-        printf("1. Nome\n2. Preço\n3. Tipo de produto\n4. Quantidade no estoque\n0. Salvar alterações e Voltar ao menu\n");
+        printf("(1) Nome\n(2) Preço\n(3) Tipo de produto\n(4) Quantidade\n(5) Status\n(0) Salvar alterações e Voltar ao menu\n");
         printf("Opção: ");
         scanf("%d", &opcao);
 
         switch(opcao){
             case 1:
-                printf("Digite o novo nome: ");
-                scanf(" %[^\n]", produto->nome); 
+                printf("Digite o novo nome (máx 20 caracteres): ");
+                scanf(" %20[^\n]", produto->nome);
                 break;
             case 2:
                 printf("Digite o novo preço: ");
@@ -118,88 +140,155 @@ void menuAlterarProduto(Produtos *produto) {
 }
 
 void alterarProduto(){
-    int codigoAlterar;
-    int encontrado = 0;
+    int codigoAlterar, encontrado=0;
     Produtos produto;
+    long int posicaoLinha; 
 
-    FILE *arquivo=abrirArquivoEstoque(2); //("estoque.txt", "r");
-    FILE *arqTemp=abrirArquivoEstoque(4); //("tempAlterar.txt", "w");
-
-    if((arquivo==NULL)||(arqTemp==NULL)){
-        if(arquivo==NULL){
-            fclose(arqTemp);
-        }if(arqTemp==NULL){
-            fclose(arquivo);
-        }
+    FILE *arquivo=abrirArquivoEstoque(3); //"estoque.txt", "r+"
+    if(arquivo==NULL){ 
         return;
     }
-
     
-    printf("\n\n-------Alterar Produto-------\n");
+    printf("\n-------------------Alterar Produto-------------------\n");
     printf("Digite o código do produto que deseja alterar: ");
     scanf("%d", &codigoAlterar);
     
-    //Percorre o arquivo de texto buscando pelo produto que possui o código
-    while(fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade)==5){
-        if(produto.codigo==codigoAlterar){
-            encontrado=1;
-            //Chama a função menuAlterarProduto para alterar o arquivo
-            menuAlterarProduto(&produto);
+    while(1){
+        posicaoLinha=ftell(arquivo); 
+
+        if(fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status)!=6) {
+            break;
         }
-        // Escreve a linha no arquivo temporário.
-        fprintf(arqTemp, "%d;%c;%s;%.2f;%d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade);
+        
+        produto.nome[20]='\0'; 
+
+        if((produto.codigo==codigoAlterar)&&(produto.status==1)){
+            encontrado=1;
+            removerEspacoFinal(produto.nome); 
+            menuAlterarProduto(&produto); 
+            fseek(arquivo, posicaoLinha, SEEK_SET);//Posiciona o cursor no inicio da linha que acabou de ler 
+            fprintf(arquivo, FORMATO_ESCRITA, produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
+            
+            break; 
+        }
     }
 
     fclose(arquivo);
-    fclose(arqTemp);
     
     if(encontrado){
-        //Se o produto foi encontrado, apaga 'estoque.txt', e renomeia 'temp.txt' para ser o novo 'estoque.txt'
-        remove("estoque.txt");
-        rename("tempAlterar.txt", "estoque.txt");
-        printf("\nProduto alterado com sucesso!\n");
+        printf("\nProduto alterado com sucesso\n");
     }else{
-        //Se não foi encontrado o produto, apenas apaga o arquivo temporário que foi criado.
-        remove("tempAlterar.txt");
-        printf("\nProduto com código %d não encontrado.\n", codigoAlterar);
+        printf("\nProduto com código %d não encontrado ou inativo.\n", codigoAlterar);
     }
 }
 
 //EXCLUSÃO DE PRODUTOS ----------------------------------------------------------------------------
 void excluirProduto(){
-    FILE *arquivo = abrirArquivoEstoque(2);
-    FILE *arqTemp = abrirArquivoEstoque(5);
+    int codigoExcluir, encontrado=0;
+    Produtos produto;
+    long int posicaoLinha;
+    char opcao;
 
-    if(arquivo==NULL || arqTemp == NULL){
+    FILE *arquivo=abrirArquivoEstoque(3); //"estoque.txt", "r+"
+    if(arquivo==NULL){ 
         return;
     }
 
-    Produtos produto;
-
-    int codigoExcluir, encontrado = 0;
-
-    printf("\n-------Excluir Produto-------\n");
+    printf("\n-------------------Excluir Produto-------------------\n");
     printf("Digite o código do produto que deseja excluir: ");
     scanf("%d", &codigoExcluir);
-    
-    while (fscanf(arquivo, "%d;%c;%[^;];%f;%d\n", &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade) == 5) {
-        if (produto.codigo == codigoExcluir) {
-            encontrado = 1;
-            printf("Produto '%s' removido.\n", produto.nome);
-        } else {
-            fprintf(arqTemp, "%d;%c;%s;%.2f;%d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade);
+
+    while(1){
+        posicaoLinha=ftell(arquivo);
+
+        if(fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status) != 6) {
+            break; // Verifica o fim do arquivo
+        }
+
+        produto.nome[20]='\0';
+
+        if((produto.codigo==codigoExcluir)&&(produto.status==1)){
+            encontrado=1;
+            removerEspacoFinal(produto.nome);
+            
+            printf("\nProduto Encontrado:\n");
+            printf("Código: %d\nTipo: %c\nNome: %s\nPreço: R$%.2f\nQuantidade: %d\nStatus: %d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
+            printf("Tem certeza que deseja marcar como INATIVO? (s/n): ");
+            scanf(" %c", &opcao);
+
+            if((opcao=='s')||(opcao=='S')){
+                produto.status=0; // Exclusão lógica
+                fseek(arquivo, posicaoLinha, SEEK_SET); 
+                fprintf(arquivo, FORMATO_ESCRITA, produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
+                printf("\nProduto '%s' marcado como inativo.\n", produto.nome);
+            }else if((opcao=='n')||(opcao=='N')){
+                printf("\nOperação cancelada.\n");
+            }else{
+                printf("Opção inválida\n");
+            }
+            break;
         }
     }
-
+    
     fclose(arquivo);
-    fclose(arqTemp);
 
-    if (encontrado) {
-        remove("estoque.txt");
-        rename("tempExcluir.txt", "estoque.txt");
-    } else {
-        remove("tempExcluir.txt");
-        printf("Produto com código %d não encontrado.\n", codigoExcluir);
+    if(encontrado==0){
+        printf("\nProduto com código %d não encontrado ou já está inativo.\n", codigoExcluir);
+    }
+}
+
+//ATIVAÇÃO DE PRODUTOS----------------------------------------------------------------------------
+void ativarProduto(){
+    int codigoAtivar, encontrado=0;
+    Produtos produto;
+    long int posicaoLinha;
+    char opcao;
+
+    FILE *arquivo = abrirArquivoEstoque(3); //"estoque.txt", "r+"
+    if(arquivo == NULL){ 
+        return;
+    }
+
+    printf("\n-------------------Ativar Produto-------------------\n");
+    printf("Digite o código do produto que deseja REATIVAR: ");
+    scanf("%d", &codigoAtivar);
+
+    while(1){
+        posicaoLinha=ftell(arquivo);
+        if(fscanf(arquivo, FORMATO_LEITURA, &produto.codigo, &produto.tipo, produto.nome, &produto.preco, &produto.quantidade, &produto.status)!=6){
+            break; //Encerra o loop se chegar no fim do arquivo
+        }
+
+        produto.nome[20]='\0';
+        
+        if((produto.codigo==codigoAtivar)&&(produto.status==0)){
+            encontrado = 1;
+            removerEspacoFinal(produto.nome);
+            
+            printf("\nProduto Encontrado (INATIVO):\n");
+            printf("Código: %d\nTipo: %c\nNome: %s\nPreço: R$%.2f\nQuantidade: %d\nStatus: %d\n", produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
+            printf("Tem certeza que deseja marcar como ATIVO? (s/n): ");
+            scanf(" %c", &opcao);
+
+            if((opcao=='s')||(opcao=='S')){
+                produto.status=1; // Ativação lógica
+                fseek(arquivo, posicaoLinha, SEEK_SET); 
+                fprintf(arquivo, FORMATO_ESCRITA, produto.codigo, produto.tipo, produto.nome, produto.preco, produto.quantidade, produto.status);
+                printf("\nProduto '%s' marcado como ativo.\n", produto.nome);
+            
+            }else if((opcao=='n')||(opcao=='N')){
+                printf("\nOperação cancelada.\n");
+            }else{
+                printf("Opção inválida\n");
+            }
+            break;
+        }
+    }
+    
+    fclose(arquivo);
+
+    if(encontrado==0){
+        printf("\nProduto com código %d não encontrado ou já está ativo.\n", codigoAtivar);
     }
 }
 
@@ -433,18 +522,20 @@ void menuConsultarProdutos() {
 }
 
 void menuCadastroProduto() {
-    int opcao;
+    int opcao=-1;
+    void (*gerenciar[])()={cadastrarProduto, alterarProduto, excluirProduto, ativarProduto};
+    
     do {
         printf("\n--- MENU CADASTRO PRODUTO ---\n");
-        printf("1. Cadastrar\n2. Alterar\n3. Excluir\n0. Voltar\nEscolha: ");
+        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n(0) Voltar\nEscolha: ");
         scanf("%d", &opcao);
-
-        switch (opcao) {
-            case 1: cadastrarProduto(); break;
-            case 2: alterarProduto(); break;
-            case 3: excluirProduto(); break;
-            case 0: break;
-            default: printf("Opção inválida!\n");
+        if(opcao==0){
+            return;
         }
-    } while (opcao != 0);
+        if((opcao>0)&&(opcao<=4)){
+            gerenciar[opcao-1]();
+        }else{
+            printf("Resposta inválida\n");
+        }
+    }while (opcao != 0);
 }
