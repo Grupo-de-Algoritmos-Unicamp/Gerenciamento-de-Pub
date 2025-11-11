@@ -495,7 +495,6 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
         return 0;
     }
 
- 
     arquivo = abrirArquivoEstoque("w");
     if (arquivo == NULL) {
         printf("Erro ao reabrir %s para escrita.\n", ARQUIVO_ESTOQUE);
@@ -537,7 +536,7 @@ void menuCadastroProduto() {
     
     do {
         printf("\n--- MENU CADASTRO PRODUTO ---\n");
-        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n (4) Ativar produto\n(0) Voltar\nEscolha: ");
+        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n(4) Ativar produto\n(0) Voltar\nEscolha: ");
         scanf("%d", &opcao);
         if(opcao==0){
             return;

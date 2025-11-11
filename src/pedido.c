@@ -124,8 +124,8 @@ int verificarProdutosPedido(Pedido *pedido) {
 
         printf("Quantidade: ");
         if (scanf("%d", &pedido->produto[i].quantidade) != 1 || pedido->produto[i].quantidade <= 0) {
-                printf("Quantidade inválida.\n");
-                return 0;
+            printf("Quantidade inválida.\n");
+            return 0;
         }
         
         float preco;
@@ -237,4 +237,5 @@ void registrarPedido() {
 
     printf("\nSaindo...\n");
 }
+
 
