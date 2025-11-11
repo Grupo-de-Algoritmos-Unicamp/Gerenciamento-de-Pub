@@ -5,8 +5,8 @@
 #include "utils.h"
 #include "estoque.h"
 
-#define FORMATO_ESCRITA "%06d %c %-20.20s %010.2f %06d %1d\n"
-#define FORMATO_LEITURA "%6d %c %20c %10f %6d %1d\n"
+#define FORMATO_ESCRITA "%06d;%c;%-20.20s;%.2f;%06d;%d\n"
+#define FORMATO_LEITURA "%6d;%c;%20[^;];%f;%6d;%d\n"
 
 FILE* abrirArquivoEstoque(int modo) {
     // 1:estoque-a  2:estoque-r 3:estoque-r+
@@ -15,6 +15,7 @@ FILE* abrirArquivoEstoque(int modo) {
         case 1: arquivo = fopen("estoque.txt", "a"); break;
         case 2: arquivo = fopen("estoque.txt", "r"); break;
         case 3: arquivo = fopen("estoque.txt", "r+"); break;
+        case 4: arquivo = fopen("estoque.txt", "w"); break;
         default: printf("Modo inválido.\n");
     }
 
@@ -50,15 +51,18 @@ void removerEspacoFinal(char *nome) {//Remove espaços em branco do final da str
         return;
     }
     
-    char *ponteiroScanner=nome+19; //Aponta para o último caractere da string
+    size_t tamanho = strlen(nome);
+    if(tamanho == 0){
+        return;
+    }
+
+    char *ponteiroScanner=nome+tamanho-1; //Aponta para o último caractere da string
     
     //Encontra o último caractere útil
     while ((ponteiroScanner>=nome)&&(isspace((unsigned char)*ponteiroScanner))) {
+        *ponteiroScanner = '\0';
         ponteiroScanner--;
-    }
-    
-    //Coloca o '\0' logo após o último caractere não vazio da string
-    *(ponteiroScanner+1) = '\0';
+    }   
 }
 
 //CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
@@ -497,7 +501,7 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     }
 
  
-    arquivo = abrirArquivoEstoque(3);
+    arquivo = abrirArquivoEstoque(4);
     if (arquivo == NULL) {
         printf("Erro ao reabrir estoque.txt para escrita.\n");
         free(lista);
@@ -538,7 +542,7 @@ void menuCadastroProduto() {
     
     do {
         printf("\n--- MENU CADASTRO PRODUTO ---\n");
-        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n(0) Voltar\nEscolha: ");
+        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n(4) Ativar produto\n(0) Voltar\nEscolha: ");
         scanf("%d", &opcao);
         if(opcao==0){
             return;
