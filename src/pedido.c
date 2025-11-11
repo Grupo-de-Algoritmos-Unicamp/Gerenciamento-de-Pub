@@ -120,7 +120,7 @@ int verificarProdutosPedido(Pedido *pedido) {
 
     for (int i = 0; i < pedido->quantidadeProdutos; i++) {
         printf("\nNome do produto %d: ", i + 1);
-        scanf(" %19[^\n]", pedido->produto[i].nome);
+        scanf(" %20[^\n]", pedido->produto[i].nome);
 
         printf("Quantidade: ");
         if (scanf("%d", &pedido->produto[i].quantidade) != 1 || pedido->produto[i].quantidade <= 0) {
@@ -237,4 +237,5 @@ void registrarPedido() {
 
     printf("\nSaindo...\n");
 }
+
 
