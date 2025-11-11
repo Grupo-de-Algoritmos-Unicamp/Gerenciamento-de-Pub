@@ -7,28 +7,24 @@
 
 #define FORMATO_ESCRITA "%06d %c %-20.20s %010.2f %06d %1d\n"
 #define FORMATO_LEITURA "%6d %c %20c %10f %6d %1d\n"
+#define ARQUIVO_ESTOQUE "estoque.txt"
 
-FILE* abrirArquivoEstoque(int modo) {
-    // 1:estoque-a  2:estoque-r 3:estoque-r+
-    FILE* arquivo = NULL;
-    switch (modo) {
-        case 1: arquivo = fopen("estoque.txt", "a"); break;
-        case 2: arquivo = fopen("estoque.txt", "r"); break;
-        case 3: arquivo = fopen("estoque.txt", "r+"); break;
-        default: printf("Modo inválido.\n");
+FILE* abrirArquivoEstoque(const char* modo) {
+
+    FILE* arquivo = fopen(ARQUIVO_ESTOQUE, modo);
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir %s no modo %s!\n", ARQUIVO_ESTOQUE, modo);
     }
-
-    if (arquivo == NULL)
-        printf("Erro ao abrir o arquivo.\n");
-
     return arquivo;
 }
+
 
 int verificarProduto(int codigo) {
     ProdutoEstoque produtoLido;
     int encontrado = 0;
 
-    FILE *arquivo = abrirArquivoEstoque(2);
+    FILE *arquivo = abrirArquivoEstoque("r");
     if (arquivo == NULL){
         return 0;
     }
@@ -87,7 +83,7 @@ void cadastrarProduto(){
     scanf(" %d", &produto.quantidade);
     produto.status=1; // Novo produto é sempre ATIVO
 
-    FILE *arquivo = abrirArquivoEstoque(1); //("estoque.txt", "a")
+    FILE *arquivo = abrirArquivoEstoque("a");
     if(arquivo==NULL){
         return;
     }
@@ -142,7 +138,7 @@ void alterarProduto(){
     ProdutoEstoque produto;
     long int posicaoLinha; 
 
-    FILE *arquivo=abrirArquivoEstoque(3); //"estoque.txt", "r+"
+    FILE *arquivo=abrirArquivoEstoque("r+");
     if(arquivo==NULL){ 
         return;
     }
@@ -187,7 +183,7 @@ void excluirProduto(){
     long int posicaoLinha;
     char opcao;
 
-    FILE *arquivo=abrirArquivoEstoque(3); //"estoque.txt", "r+"
+    FILE *arquivo=abrirArquivoEstoque("r+");
     if(arquivo==NULL){ 
         return;
     }
@@ -242,7 +238,7 @@ void ativarProduto(){
     long int posicaoLinha;
     char opcao;
 
-    FILE *arquivo = abrirArquivoEstoque(3); //"estoque.txt", "r+"
+    FILE *arquivo = abrirArquivoEstoque("r+");
     if(arquivo == NULL){ 
         return;
     }
@@ -292,7 +288,7 @@ void ativarProduto(){
 
 //LISTA DE PRODUTOS---------------------------------------------------------------------------------------------------
 void listarTodos(){
-    FILE* arquivo = abrirArquivoEstoque(2);
+    FILE* arquivo = abrirArquivoEstoque("r");
     if(arquivo == NULL){
         return;
     }
@@ -313,7 +309,7 @@ void listarTodos(){
 
 //listar apenas as bebidas do estoque
 void listarBebidas(){
-    FILE* arquivo = abrirArquivoEstoque(2);
+    FILE* arquivo = abrirArquivoEstoque("r");
     if(arquivo == NULL){
         return;
     }
@@ -334,7 +330,7 @@ void listarBebidas(){
 
 //listar todas as comidas do estoque
 void listarComidas(){
-    FILE *arquivo = abrirArquivoEstoque(2);
+    FILE *arquivo = abrirArquivoEstoque("r");
     if (arquivo == NULL){
         return;
     } 
@@ -353,7 +349,7 @@ void listarComidas(){
 }
 
 void consultarProdutoPorCodigo(){
-    FILE *arquivo = abrirArquivoEstoque(2);
+    FILE *arquivo = abrirArquivoEstoque("r");
     if (arquivo == NULL){
         return;
     }
@@ -382,7 +378,7 @@ void consultarProdutoPorCodigo(){
 
 //FUNÇÕES AUXILIARES PARA PEDIDOS---------------------------------------------------------------------------------------------------
 int obterPrecoQuantidadePorNome(const char nomeProduto[], float *precoUnitario, int *quantidadeDisponivel) {
-    FILE *arquivo = abrirArquivoEstoque(2);
+    FILE *arquivo = abrirArquivoEstoque("r");
     if (!arquivo) return 0;
 
     ProdutoEstoque produto;
@@ -402,7 +398,7 @@ int obterPrecoQuantidadePorNome(const char nomeProduto[], float *precoUnitario, 
 }
 
 int obterPrecoQuantidadePorCodigo(int codigoBusca, float *precoUnitario, int *quantidadeDisponivel, char *nomeProduto) {
-    FILE *arquivo = abrirArquivoEstoque(2);
+    FILE *arquivo = abrirArquivoEstoque("r");
     if (!arquivo) return 0;
 
     ProdutoEstoque produto;
@@ -428,9 +424,9 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     // modo = 1 -> venda (subtrai)
     // modo = 2 -> reposição (soma)
 
-    FILE *arquivo = abrirArquivoEstoque(2); // modo leitura
+    FILE *arquivo = abrirArquivoEstoque("r"); // modo leitura
     if (arquivo == NULL) {
-        printf("estoque.txt não encontrado.\n");
+	printf("%s não encontrado.\n", ARQUIVO_ESTOQUE);
         return 0;
     }
 
@@ -497,9 +493,9 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     }
 
  
-    arquivo = abrirArquivoEstoque(3);
+    arquivo = abrirArquivoEstoque("r+");
     if (arquivo == NULL) {
-        printf("Erro ao reabrir estoque.txt para escrita.\n");
+        printf("Erro ao reabrir %s para escrita.\n", ARQUIVO_ESTOQUE);
         free(lista);
         return 0;
     }
