@@ -1,7 +1,7 @@
 #ifndef ESTOQUE_H
 #define ESTOQUE_H
 
-FILE* abrirArquivoEstoque(int modo);
+FILE* abrirArquivoEstoque(const char* modo);
 
 void menuCadastroProduto();
 void menuConsultarProdutos();
