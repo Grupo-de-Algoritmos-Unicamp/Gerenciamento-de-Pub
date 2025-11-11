@@ -3,7 +3,7 @@
 #include "estoque.h"
 
 typedef struct{
-    char nome[31];
+    char nome[21];
     int quantidade;
     float precoUnitario;
     float precoTotal;
@@ -30,5 +30,6 @@ int verificarProdutosPedido(Pedido *pedido);
 int atualizarEstoquePedido(Pedido *pedido);
 
 #endif
+
 
 
