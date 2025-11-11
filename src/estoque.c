@@ -46,15 +46,18 @@ void removerEspacoFinal(char *nome) {//Remove espaços em branco do final da str
         return;
     }
     
-    char *ponteiroScanner=nome+19; //Aponta para o último caractere da string
+    size_t tamanho = strlen(nome);
+    if(tamanho == 0){
+        return;
+    }
+
+    char *ponteiroScanner=nome+tamanho-1; //Aponta para o último caractere da string
     
     //Encontra o último caractere útil
     while ((ponteiroScanner>=nome)&&(isspace((unsigned char)*ponteiroScanner))) {
+        *(ponteiroScanner+1) = '\0';
         ponteiroScanner--;
-    }
-    
-    //Coloca o '\0' logo após o último caractere não vazio da string
-    *(ponteiroScanner+1) = '\0';
+    }    
 }
 
 //CADASTRO DE PRODUTOS----------------------------------------------------------------------------------------------
@@ -493,7 +496,7 @@ int atualizarEstoque(char nomeProduto[], int quantidadeAlterar, int modo) {
     }
 
  
-    arquivo = abrirArquivoEstoque("r+");
+    arquivo = abrirArquivoEstoque("w");
     if (arquivo == NULL) {
         printf("Erro ao reabrir %s para escrita.\n", ARQUIVO_ESTOQUE);
         free(lista);
@@ -534,7 +537,7 @@ void menuCadastroProduto() {
     
     do {
         printf("\n--- MENU CADASTRO PRODUTO ---\n");
-        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n(0) Voltar\nEscolha: ");
+        printf("(1) Cadastrar\n(2) Alterar\n(3) Excluir\n (4) Ativar produto\n(0) Voltar\nEscolha: ");
         scanf("%d", &opcao);
         if(opcao==0){
             return;
