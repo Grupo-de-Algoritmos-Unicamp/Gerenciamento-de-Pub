@@ -120,13 +120,11 @@ int verificarProdutosPedido(Pedido *pedido) {
 
     for (int i = 0; i < pedido->quantidadeProdutos; i++) {
         printf("\nNome do produto %d: ", i + 1);
-        scanf(" %30[^\n]", pedido->produto[i].nome);
+        scanf(" %19[^\n]", pedido->produto[i].nome);
 
         printf("Quantidade: ");
-        scanf("%d", &pedido->produto[i].quantidade);
-
-        if (pedido->produto[i].quantidade <= 0) {
-            printf("Quantidade invalida.\n");
+        if (scanf("%d", &pedido->produto[i].quantidade) != 1 || pedido->produto[i].quantidade <= 0) {
+            printf("Quantidade inválida.\n");
             return 0;
         }
 
@@ -155,8 +153,19 @@ int verificarProdutosPedido(Pedido *pedido) {
         }
         
         if (disponivel < pedido->produto[i].quantidade) {
-            printf("Estoque insuficiente de '%s'! Pedido cancelado.\n", pedido->produto[i].nome);
-            return 0;
+            printf("Estoque insuficiente de '%s'! Há apenas %d unidades disponíveis.\n", pedido->produto[i].nome, disponivel);
+            
+            char opcao;
+            printf("Deseja manter o produto com %d unidades disponíveis? (s/n): ", disponivel);
+            scanf(" %c", &opcao);
+
+            if (opcao == 's' || opcao == 'S') {
+                pedido->produto[i].quantidade = disponivel;
+                printf("Quantidade ajustada para %d unidades.\n", disponivel);
+            } else {
+                printf("Produto '%s' removido do pedido.\n", pedido->produto[i].nome);
+                return 0;
+            }
         }
 
         pedido->produto[i].precoUnitario = preco;
@@ -184,13 +193,11 @@ void registrarPedido() {
 
     do {
         printf("\nDigite o CPF do cliente: ");
-        scanf("%s", pedido.cpf);
+        scanf("%14s", pedido.cpf);
 
         printf("Digite a quantidade de produtos distintos: ");
-        scanf("%d", &pedido.quantidadeProdutos);
-
-        if (pedido.quantidadeProdutos <= 0) {
-            printf("Quantidade invalida.\n");
+        if (scanf("%d", &pedido.quantidadeProdutos) != 1 || pedido.quantidadeProdutos <= 0) {
+            printf("Quantidade inválida.\n");
             return;
         }
 
