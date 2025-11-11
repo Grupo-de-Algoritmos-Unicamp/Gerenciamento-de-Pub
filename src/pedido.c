@@ -5,26 +5,29 @@
 #include "estoque.h"
 #include "pedido.h"
 
-FILE* abrirArquivosPedidos(int modo){
-    FILE* arquivo = NULL;
+#define ARQUIVO_PEDIDOS "pedidos.txt"
+#define ARQUIVO_ITENS "itens_vendidos.txt"
 
-    switch (modo) {
-        case 1: arquivo = fopen("pedidos.txt", "r"); break;
-        case 2: arquivo = fopen("pedidos.txt","a"); break;
-        case 3: arquivo = fopen("itens_vendidos.txt", "a"); break;
-        case 4: arquivo = fopen("itens_vendidos.txt", "r"); break;
-        default: printf("\nModo de abertura de arquivo inválido,\n"); return NULL;
+FILE* abrirArquivoPedidos(const char* modo) {
+    FILE* arquivo = fopen(ARQUIVO_PEDIDOS, modo);
+    if (arquivo == NULL) {
+        printf("Erro ao abrir %s no modo %s!\n", ARQUIVO_PEDIDOS, modo);
     }
-
-    if (arquivo == NULL)
-        printf("Erro ao abrir o arquivo.\n");
-
     return arquivo;
 }
 
+FILE* abrirArquivoItens(const char* modo) {
+    FILE* arquivo = fopen(ARQUIVO_ITENS, modo);
+    if (arquivo == NULL) {
+        printf("Erro ao abrir %s no modo %s!\n", ARQUIVO_ITENS, modo);
+    }
+    return arquivo;
+}
+
+
 //Garante que ao abrir o programa novamente o número do pedido não recomece em 1
 int gerarProximoIDPedido() {
-    FILE *f = abrirArquivosPedidos(1);
+    FILE *f = abrirArquivoPedidos("r");
 
     if (f==NULL){
         return 1; //Retorna 1 se o arquivo pedidos.txt não existir
@@ -44,7 +47,7 @@ int gerarProximoIDPedido() {
 }
 
 void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total) {
-    FILE *arquivo = abrirArquivosPedidos(2);
+    FILE *arquivo = abrirArquivoPedidos("a");
 
     if (!arquivo) {
         printf("Erro ao abrir pedidos.txt!\n");
@@ -61,7 +64,7 @@ void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total) 
 }
 
 void gerarArquivoItensVendidos(Pedido *pedido) {
-    FILE *arquivo = abrirArquivosPedidos(3);
+    FILE *arquivo = abrirArquivoItens("a");
     if (!arquivo) {
         printf("Erro ao abrir itens_vendidos.txt!\n");
         return;

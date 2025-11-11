@@ -18,7 +18,8 @@ typedef struct{
     ItemPedido *produto;
 } Pedido;
 
-FILE* abrirArquivosPedidos(int modo);
+FILE* abrirArquivoPedidos(const char* modo);
+FILE* abrirArquivoItens(const char* modo);
 
 void registrarPedido();
 void gerarArquivoPedidos(int id, const char *cpf, int qtdProdutos, float total);

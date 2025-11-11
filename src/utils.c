@@ -63,7 +63,7 @@ void cadastrarCliente() {
 
 float calcularValorGasto(const char* buscaCpf) {
     
-    FILE *arqPedido = abrirArquivosPedidos(1);
+    FILE *arqPedido = abrirArquivoPedidos("r");
     if (arqPedido == NULL) {
         printf("\nErro ao abrir o arquivo pedidos.txt para identificar o valor total gasto!\n");
         return 0.0;
@@ -135,8 +135,8 @@ void consultarCliente() {
 
 //lê os arquivos e retorna dados
 void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, ItemPedido **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro) {
-    FILE *fpPedidos = abrirArquivosPedidos(1);   
-    FILE *fpItens = abrirArquivosPedidos(4);     
+    FILE *fpPedidos = abrirArquivoPedidos("r");   
+    FILE *fpItens = abrirArquivoItens("r");     
 
     if (!fpPedidos || !fpItens) {
         printf("\nErro: não foi possível abrir os arquivos pedidos.txt ou itens_vendidos.txt.\n");
