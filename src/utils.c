@@ -134,7 +134,7 @@ void consultarCliente() {
 }
 
 //lê os arquivos e retorna dados
-void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, Produto **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro) {
+void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, ItemPedido **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro) {
     FILE *fpPedidos = abrirArquivosPedidos(1);   
     FILE *fpItens = abrirArquivosPedidos(4);     
 
@@ -177,7 +177,7 @@ void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, Produto **itens, in
 
     while (fgets(linha, sizeof(linha), fpItens)) {
         int idPedido;
-        Produto it;
+        ItemPedido it;
 
         if (sscanf(linha, "%d;%[^;];%d;%f;%f", &idPedido, it.nome, &it.quantidade, &it.precoUnitario, &it.precoTotal) == 5) {
             int incluir = 0;
@@ -194,7 +194,7 @@ void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, Produto **itens, in
             if (incluir) {
                 if (*numItens == capItens) {
                     capItens = (capItens == 0) ? 20 : capItens * 2;
-                    *itens = realloc(*itens, capItens * sizeof(Produto));
+                    *itens = realloc(*itens, capItens * sizeof(ItemPedido));
                     *idsItens = realloc(*idsItens, capItens * sizeof(int));
                 }
                 (*itens)[*numItens] = it;
@@ -244,7 +244,7 @@ void gerarRelatorio() {
     }
 
     Pedido *pedidos = NULL;
-    Produto *itens = NULL;
+    ItemPedido *itens = NULL;
     int *idsItens = NULL;
     size_t numPedidos = 0, numItens = 0;
 

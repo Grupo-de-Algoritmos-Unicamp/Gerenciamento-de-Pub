@@ -26,7 +26,7 @@ typedef struct{
     float preco;
     int quantidade;
     int status;//1-Ativo e 0- inativo
-}Produtos;
+}ProdutoEstoque;
 
 #endif
 

@@ -194,7 +194,7 @@ void registrarPedido() {
             return;
         }
 
-        pedido.produto = malloc(pedido.quantidadeProdutos * sizeof(Produto));
+        pedido.produto = malloc(pedido.quantidadeProdutos * sizeof(ItemPedido));
         if (!pedido.produto) {
             printf("Erro de memória.\n");
             return;

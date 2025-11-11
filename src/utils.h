@@ -15,7 +15,7 @@ void menuInicial();
 void sair();
 void cadastrarCliente();
 void consultarCliente();
-void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, Produto **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro);
+void lerDadosRelatorio(Pedido **pedidos, size_t *numPedidos, ItemPedido **itens, int **idsItens, size_t *numItens, int filtrar, const char *dataFiltro);
 void gerarArquivoRelatorio(const char *dataFiltro, int filtrar, ResumoProduto *resumo, size_t numResumo, float totalVendas, size_t numPedidos);
 void gerarRelatorio();
 

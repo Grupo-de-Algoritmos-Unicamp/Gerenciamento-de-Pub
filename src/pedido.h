@@ -7,7 +7,7 @@ typedef struct{
     int quantidade;
     float precoUnitario;
     float precoTotal;
-} Produto;
+} ItemPedido;
 
 typedef struct{
     int id;
@@ -15,7 +15,7 @@ typedef struct{
     char data[20];
     int quantidadeProdutos;
     float valorTotal;
-    Produto *produto;
+    ItemPedido *produto;
 } Pedido;
 
 FILE* abrirArquivosPedidos(int modo);
